@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using System.Runtime.Serialization;
+using Microsoft.CodeAnalysis.Formatting;
 
 namespace TestGenerator.CodeGenerators
 {
@@ -17,10 +17,11 @@ namespace TestGenerator.CodeGenerators
             body = GetUnitTestBody();
         }
 
-        private AttributeListSyntax CreateUnitTestAttribute(string attributeName)
+        private AttributeListSyntax CreateUnitTestAttribute(string attrName)
         {
             return AttributeList(
-                             SingletonSeparatedList(Attribute(IdentifierName(attributeName))));
+                        SingletonSeparatedList(
+                                 Attribute(IdentifierName(attrName))));
         }
 
         protected abstract StatementSyntax GetUnitTestBody();
@@ -30,7 +31,7 @@ namespace TestGenerator.CodeGenerators
             var sourceNamespace = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
             var newNamespace = CreateNewNamespace(sourceNamespace);
 
-            var usings = root.Usings.Add(GetDefaultUsing());
+            var usings = root.Usings.AddRange(GetDefaultUsings());
 
             var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
             var testClasses = new List<string>();
@@ -47,7 +48,7 @@ namespace TestGenerator.CodeGenerators
             else return NamespaceDeclaration(IdentifierName("Tests"));
         }
 
-        protected abstract UsingDirectiveSyntax GetDefaultUsing();
+        protected abstract List<UsingDirectiveSyntax> GetDefaultUsings();
 
         private string GenerateClass(ClassDeclarationSyntax classDeclaration, NamespaceDeclarationSyntax newNamespace, in SyntaxList<UsingDirectiveSyntax> usings)
         {
