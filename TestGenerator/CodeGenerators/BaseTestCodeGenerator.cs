@@ -54,6 +54,7 @@ namespace TestGenerator.CodeGenerators
         {
             var newClass = ClassDeclaration(classDeclaration.Identifier.Text + "Tests")
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
+
             var publicMethods = GetPublicMethods(classDeclaration);
             newClass = newClass.AddMembers(GenerateTestMethods(publicMethods).ToArray());
 
@@ -71,10 +72,21 @@ namespace TestGenerator.CodeGenerators
 
         private IEnumerable<MethodDeclarationSyntax> GenerateTestMethods(IEnumerable<MethodDeclarationSyntax> sourceMethods)
         {
+            var overloader = new Dictionary<string, int>();
             var newMethods = new List<MethodDeclarationSyntax>();
             foreach (var method in sourceMethods)
             {
-                newMethods.Add(GenerateTestMethod(method.Identifier.Text));
+                string key = method.Identifier.Text;
+                if (overloader.ContainsKey(key))
+                {
+                    overloader[key]++;
+                    newMethods.Add(GenerateTestMethod(key + overloader[key].ToString() + "Test"));
+                }
+                else
+                {
+                    overloader.Add(key, 1);
+                    newMethods.Add(GenerateTestMethod(key + "Test"));
+                }
             }
             return newMethods;
         }
