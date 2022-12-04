@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Threading.Tasks.Dataflow;
 
@@ -16,14 +15,6 @@ namespace TestGenerator
             this.generatorConfig = generatorConfig;
         }
 
-        /// <summary>
-        /// Generate source test code
-        /// </summary>
-        /// <param name="files">files array to read</param>
-        /// <param name="writeFolder">folder to write</param>
-        /// <param name="maxDegreeOfParallelism">parallelism degree</param>
-        /// <returns></returns>
-        /// <exception cref="FileNotFoundException"></exception>
         public Task Generate(string[] files, string writeFolder)
         {
 
@@ -71,7 +62,7 @@ namespace TestGenerator
 
         private static async Task<string> ReadFileAsync(string fileName)
         {
-            using StreamReader sr = new(fileName);
+            using StreamReader sr = new StreamReader(fileName);
             return await sr.ReadToEndAsync();
         }
 
@@ -80,7 +71,7 @@ namespace TestGenerator
             var root = await CSharpSyntaxTree.ParseText(text).GetRootAsync();
             var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
             var path = writeFolder + classDeclaration.Identifier.Text + "_" + Guid.NewGuid().ToString() + ".cs";
-            using StreamWriter sw = new(path);
+            using StreamWriter sw = new StreamWriter(path);
             await sw.WriteAsync(text);
         }
     }

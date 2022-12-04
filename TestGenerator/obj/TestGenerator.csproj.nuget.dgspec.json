@@ -40,7 +40,21 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "Microsoft.CodeAnalysis.Analyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.3.3, )"
+            },
             "Microsoft.CodeAnalysis.CSharp": {
+              "target": "Package",
+              "version": "[4.4.0, )"
+            },
+            "Microsoft.CodeAnalysis.Common": {
+              "target": "Package",
+              "version": "[4.4.0, )"
+            },
+            "Microsoft.CodeAnalysis.Workspaces.Common": {
               "target": "Package",
               "version": "[4.4.0, )"
             }

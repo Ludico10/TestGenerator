@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TestGenerator
+﻿namespace TestGenerator
 {
-    internal interface Interface1
+    public interface ICodeGenerator
     {
+        string[] Generate(string text);
     }
 }
