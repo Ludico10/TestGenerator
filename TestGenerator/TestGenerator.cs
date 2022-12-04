@@ -50,11 +50,8 @@ namespace TestGenerator
 
             foreach (var file in files)
             {
-                if (!File.Exists(file))
-                {
-                    throw new FileNotFoundException($"File not found: {file}");
-                }
-                readFileBlock.Post(file);
+                if (File.Exists(file)) 
+                    readFileBlock.Post(file);
             }
             readFileBlock.Complete();
             return writeFileBlock.Completion;

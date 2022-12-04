@@ -1,0 +1,12 @@
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\bin\Debug\net6.0\TestGenerator.deps.json
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\bin\Debug\net6.0\TestGenerator.dll
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\bin\Debug\net6.0\TestGenerator.pdb
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\obj\Debug\net6.0\TestGenerator.csproj.AssemblyReference.cache
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\obj\Debug\net6.0\TestGenerator.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\obj\Debug\net6.0\TestGenerator.AssemblyInfoInputs.cache
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\obj\Debug\net6.0\TestGenerator.AssemblyInfo.cs
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\obj\Debug\net6.0\TestGenerator.csproj.CoreCompileInputs.cache
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\obj\Debug\net6.0\TestGenerator.dll
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\obj\Debug\net6.0\refint\TestGenerator.dll
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\obj\Debug\net6.0\TestGenerator.pdb
+C:\Users\eugen\source\repos\TestGenerator\TestGenerator\obj\Debug\net6.0\ref\TestGenerator.dll
