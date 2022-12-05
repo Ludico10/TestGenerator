@@ -26,14 +26,35 @@ namespace TestGenerator.CodeGenerators
 
         protected abstract StatementSyntax GetUnitTestBody();
 
-        protected IEnumerable<string> GenerateClasses(CompilationUnitSyntax root)
+        protected IEnumerable<string> GenerateNamespaces(CompilationUnitSyntax root)
         {
-            var sourceNamespace = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
-            var newNamespace = CreateNewNamespace(sourceNamespace);
-
+            var spaces = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>();
             var usings = root.Usings.AddRange(GetDefaultUsings());
+            usings = List(usings.UnionBy(GetFileUsings(root), u => u.Name.ToString()));
 
-            var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
+            var allClasses = new List<string>();
+            foreach (var ns in spaces) 
+            {
+                allClasses.AddRange(GenerateClasses(ns, usings));
+            }
+            return allClasses;
+        }
+
+        protected abstract List<UsingDirectiveSyntax> GetDefaultUsings();
+
+        private SyntaxList<UsingDirectiveSyntax> GetFileUsings(CompilationUnitSyntax root)
+        {
+            return List(root.DescendantNodes().OfType<UsingDirectiveSyntax>());
+        }
+
+        private IEnumerable<string> GenerateClasses(NamespaceDeclarationSyntax sourceNamespace, SyntaxList<UsingDirectiveSyntax> usings)
+        {
+            var newNamespace = CreateNewNamespace(sourceNamespace);
+            var nsUsing = new SyntaxList<UsingDirectiveSyntax>();
+            nsUsing.Add(UsingDirective(IdentifierName(sourceNamespace.Name.ToString())));
+            usings = List(usings.UnionBy(nsUsing, u => u.Name.ToString()));
+
+            var classes = sourceNamespace.DescendantNodes().OfType<ClassDeclarationSyntax>();
             var testClasses = new List<string>();
             foreach (var classDeclaration in classes)
             {
@@ -47,8 +68,6 @@ namespace TestGenerator.CodeGenerators
             if (sourceNamespace != null) return NamespaceDeclaration(IdentifierName($"{sourceNamespace.Name}.Tests"));
             else return NamespaceDeclaration(IdentifierName("Tests"));
         }
-
-        protected abstract List<UsingDirectiveSyntax> GetDefaultUsings();
 
         private string GenerateClass(ClassDeclarationSyntax classDeclaration, NamespaceDeclarationSyntax newNamespace, in SyntaxList<UsingDirectiveSyntax> usings)
         {
