@@ -14,7 +14,7 @@ namespace TestGenerator.CodeGenerators
         public string[] Generate(string text)
         {
             var root = CSharpSyntaxTree.ParseText(text).GetCompilationUnitRoot();
-            return GenerateNamespaces(root).ToArray();
+            return GenerateClasses(root).ToArray();
         }
 
         protected override List<UsingDirectiveSyntax> GetDefaultUsings()

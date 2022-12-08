@@ -57,7 +57,7 @@ namespace TestGenerator
             return writeFileBlock.Completion;
         }
 
-        private static async Task<string> ReadFileAsync(string fileName)
+        public static async Task<string> ReadFileAsync(string fileName)
         {
             using StreamReader sr = new StreamReader(fileName);
             return await sr.ReadToEndAsync();
@@ -67,9 +67,20 @@ namespace TestGenerator
         {
             var root = await CSharpSyntaxTree.ParseText(text).GetRootAsync();
             var classDeclaration = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
-            var path = writeFolder + classDeclaration.Identifier.Text + "_" + Guid.NewGuid().ToString() + ".cs";
+            var path = writeFolder + GetPrefix(classDeclaration) + classDeclaration.Identifier.Text + ".cs";
             using StreamWriter sw = new StreamWriter(path);
             await sw.WriteAsync(text);
+        }
+
+        private static string GetPrefix(ClassDeclarationSyntax classDeclaration)
+        {
+            string res = "";
+            if (classDeclaration.Parent != null && classDeclaration.Parent.GetType().Name == "NamespaceDeclarationSyntax")
+            {
+                var space = (BaseNamespaceDeclarationSyntax)classDeclaration.Parent;
+                res = space.Name.ToString() + ".";
+            }
+            return res;
         }
     }
 }

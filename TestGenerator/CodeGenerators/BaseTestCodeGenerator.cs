@@ -26,20 +26,6 @@ namespace TestGenerator.CodeGenerators
 
         protected abstract StatementSyntax GetUnitTestBody();
 
-        protected IEnumerable<string> GenerateNamespaces(CompilationUnitSyntax root)
-        {
-            var spaces = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>();
-            var usings = root.Usings.AddRange(GetDefaultUsings());
-            usings = List(usings.UnionBy(GetFileUsings(root), u => u.Name.ToString()));
-
-            var allClasses = new List<string>();
-            foreach (var ns in spaces) 
-            {
-                allClasses.AddRange(GenerateClasses(ns, usings));
-            }
-            return allClasses;
-        }
-
         protected abstract List<UsingDirectiveSyntax> GetDefaultUsings();
 
         private SyntaxList<UsingDirectiveSyntax> GetFileUsings(CompilationUnitSyntax root)
@@ -47,29 +33,47 @@ namespace TestGenerator.CodeGenerators
             return List(root.DescendantNodes().OfType<UsingDirectiveSyntax>());
         }
 
-        private IEnumerable<string> GenerateClasses(NamespaceDeclarationSyntax sourceNamespace, SyntaxList<UsingDirectiveSyntax> usings)
+        public IEnumerable<string> GenerateClasses(CompilationUnitSyntax root)
         {
-            var newNamespace = CreateNewNamespace(sourceNamespace);
-            var nsUsing = new SyntaxList<UsingDirectiveSyntax>();
-            nsUsing.Add(UsingDirective(IdentifierName(sourceNamespace.Name.ToString())));
-            usings = List(usings.UnionBy(nsUsing, u => u.Name.ToString()));
+            var usings = root.Usings.AddRange(GetDefaultUsings());
+            usings = List(usings.UnionBy(GetFileUsings(root), u => u.Name.ToString()));
 
-            var classes = sourceNamespace.DescendantNodes().OfType<ClassDeclarationSyntax>();
+            var classes = root.DescendantNodes().OfType<ClassDeclarationSyntax>().Where(c => Case(c));
             var testClasses = new List<string>();
             foreach (var classDeclaration in classes)
             {
+                BaseNamespaceDeclarationSyntax? sourceNamespace = null;
+                if (classDeclaration.Parent != null) 
+                {
+                    string parent = classDeclaration.Parent.GetType().Name;
+                    if ((parent == "FileScopedNamespaceDeclarationSyntax") || (parent == "NamespaceDeclarationSyntax"))
+                    {
+                        sourceNamespace = (BaseNamespaceDeclarationSyntax)classDeclaration.Parent;
+                        var nsUsing = new List<UsingDirectiveSyntax>();
+                        nsUsing.Add(UsingDirective(IdentifierName(sourceNamespace.Name.ToString())));
+                        usings = List(usings.UnionBy(nsUsing, u => u.Name.ToString()));
+                    }
+                }
+                var newNamespace = CreateNewNamespace(sourceNamespace);
                 testClasses.Add(GenerateClass(classDeclaration, newNamespace, in usings));
             }
             return testClasses;
         }
 
-        private NamespaceDeclarationSyntax CreateNewNamespace(NamespaceDeclarationSyntax? sourceNamespace)
+        private bool Case(ClassDeclarationSyntax c)
+        {
+            return (c.Parent != null) && ((c.Parent.GetType().Name == "FileScopedNamespaceDeclarationSyntax") || 
+                                          (c.Parent.GetType().Name == "CompilationUnitSyntax") ||
+                                          (c.Parent.GetType().Name == "NamespaceDeclarationSyntax"));
+        }
+
+        private BaseNamespaceDeclarationSyntax CreateNewNamespace(BaseNamespaceDeclarationSyntax? sourceNamespace)
         {
             if (sourceNamespace != null) return NamespaceDeclaration(IdentifierName($"{sourceNamespace.Name}.Tests"));
             else return NamespaceDeclaration(IdentifierName("Tests"));
         }
 
-        private string GenerateClass(ClassDeclarationSyntax classDeclaration, NamespaceDeclarationSyntax newNamespace, in SyntaxList<UsingDirectiveSyntax> usings)
+        private string GenerateClass(ClassDeclarationSyntax classDeclaration, BaseNamespaceDeclarationSyntax newNamespace, in SyntaxList<UsingDirectiveSyntax> usings)
         {
             var newClass = ClassDeclaration(classDeclaration.Identifier.Text + "Tests")
                 .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
@@ -99,12 +103,12 @@ namespace TestGenerator.CodeGenerators
                 if (overloader.ContainsKey(key))
                 {
                     overloader[key]++;
-                    newMethods.Add(GenerateTestMethod(key + overloader[key].ToString() + "Test"));
+                    newMethods.Add(GenerateTestMethod(key + overloader[key].ToString()));
                 }
                 else
                 {
                     overloader.Add(key, 1);
-                    newMethods.Add(GenerateTestMethod(key + "Test"));
+                    newMethods.Add(GenerateTestMethod(key));
                 }
             }
             return newMethods;
