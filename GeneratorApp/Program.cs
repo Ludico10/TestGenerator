@@ -3,20 +3,57 @@ using TestGenerator.CodeGenerators;
 
 internal class Program
 {
-    private static void Main()
+    public static void Main()
     {
-        List<string> files = new List<string>(1);
-        const string writeFolder = @"..\..\..\..\TestClasses\";
-        const string path = @"..\..\..\..\SourceClasses\SourceClass";
-
-        for (int i = 0; i < files.Capacity; i++)
+        Console.WriteLine("Enter source files (STOP to move to the next step):");
+        List<string> files = new List<string>();
+        string? file = Console.ReadLine();
+        while (file != "STOP")
         {
-            var fileName = path + i.ToString() + ".cs";
-            files.Add(fileName);
+            if (!File.Exists(file)) Console.WriteLine($"Wrong file name: {file}");
+            else if (Path.GetExtension(file) != ".cs") Console.WriteLine($"Wrong file extension: {file}");
+            else files.Add(file);
+            file = Console.ReadLine();
         }
 
-        var testGenerator = new TestGenerator.TestGenerator(new NUnitTestCodeGenerator(), new GeneratorConfig());
-        var task = testGenerator.Generate(files.ToArray(), writeFolder);
-        task.Wait();
+        int maxDegreeOfRead = ReadInt("read");
+        int maxDegreeOfGenerate = ReadInt("generate");
+        int maxDegreeOfWrite = ReadInt("write");
+
+        Console.WriteLine("Enter path to write:");
+        string? path = Console.ReadLine();
+        while (path == null)
+        {
+            Console.WriteLine("Invalid value. Try again.");
+            path = Console.ReadLine();
+        }
+
+        var generator = new TestGenerator.TestGenerator(new NUnitTestCodeGenerator(), new GeneratorConfig(maxDegreeOfRead, maxDegreeOfGenerate, maxDegreeOfWrite));
+        try
+        {
+            var task = generator.Generate(files.ToArray(), path);
+            task.Wait();
+            Console.WriteLine("Test generation complete");
+        }
+        catch 
+        {
+            Console.WriteLine("Test generation failed: it is not possible to write the result on the specified path.");
+        }
+    }
+
+    public static int ReadInt(string param)
+    {
+        Console.WriteLine($"Enter maximum count of { param } tasks:");
+        while (true)
+        {
+            string? read = Console.ReadLine();
+            if (read != null)
+            {
+                int res = int.Parse(read);
+                if (res > 0) return res;
+                else Console.WriteLine("Invalid value. Try again.");
+            }
+            else Console.WriteLine("Invalid value. Try again.");
+        }
     }
 }
